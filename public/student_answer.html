@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Class Quiz / Student Client</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    header {
+      padding: 12px 16px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+    header .sub {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    .status-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+    }
+    main {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 14px 16px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      opacity: 0.9;
+    }
+    .badge-joined {
+      border-color: #22c55e;
+      color: #bbf7d0;
+      background: rgba(34, 197, 94, 0.1);
+    }
+    .badge-not-joined {
+      border-color: #f97316;
+      color: #fed7aa;
+      background: rgba(249, 115, 22, 0.1);
+    }
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .field {
+      flex: 1 1 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    label {
+      font-size: 11px;
+      opacity: 0.7;
+    }
+    input {
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      padding: 6px 10px;
+      font-size: 13px;
+      background: #020617;
+      color: #e5e7eb;
+      width: 100%;
+    }
+    select {
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      padding: 6px 10px;
+      font-size: 13px;
+      background: #020617;
+      color: #e5e7eb;
+      width: 100%;
+    }
+    button {
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      padding: 6px 14px;
+      font-size: 13px;
+      background: #111827;
+      color: #e5e7eb;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    button.primary {
+      border-color: #22c55e;
+      background: #16a34a;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .muted {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    .question-text {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .option-btn {
+      width: 100%;
+      justify-content: space-between;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .option-btn span.option-letter {
+      opacity: 0.8;
+      margin-right: 6px;
+    }
+    .option-btn.selected {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+      background: #0b1120;
+    }
+    .option-btn.correct {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.15);
+    }
+    .option-btn.wrong {
+      border-color: #f97316;
+      background: rgba(249, 115, 22, 0.15);
+    }
+    .countdown {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .countdown-sub {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    .pill-status {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .pill-status.running {
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+    .pill-status.pending {
+      border-color: #60a5fa;
+      color: #bfdbfe;
+    }
+    .pill-status.ended {
+      border-color: #f97316;
+      color: #fed7aa;
+    }
+    .feedback {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    .feedback.ok {
+      color: #bbf7d0;
+    }
+    .feedback.err {
+      color: #fecaca;
+    }
+    footer {
+      padding: 8px 16px 14px;
+      font-size: 11px;
+      opacity: 0.6;
+      border-top: 1px solid #1f2937;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Class Quiz / Student</h1>
+    <div class="sub">Wait for the teacher to start the question.</div>
+  </div>
+  <div class="status-dot">
+    <div class="dot"></div>
+    <span id="connection-status">Syncing...</span>
+  </div>
+</header>
+
+<main>
+  <!-- 配置与加入 -->
+  <section class="card">
+    <h2>
+      My Identity
+      <span id="joined-badge" class="badge badge-not-joined">Not Joined</span>
+    </h2>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="room-select">Select Room</label>
+        <select id="room-select">
+          <option value="">Loading rooms...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="student-name-input">Your Name (for leaderboard)</label>
+        <input id="student-name-input" placeholder="" />
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button id="btn-join" class="primary">Join Room</button>
+      </div>
+    </div>
+
+    <div class="muted" id="join-hint">
+      After joining, wait for the teacher to start the question.
+    </div>
+  </section>
+
+  <!-- 题目与作答 / 或者最终成绩 -->
+  <section class="card">
+    <h2>
+      Current Question
+      <span id="question-pill" class="pill-status pending">Waiting</span>
+    </h2>
+
+    <div class="question-text" id="question-text">Waiting for the teacher to start...</div>
+    <div class="muted" id="question-meta">Room: -- / Question: --/--</div>
+
+    <div class="options" id="options-container">
+      <!-- 选项按钮动态插入 -->
+    </div>
+
+    <div style="margin-top: 8px; display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <div>
+        <div class="countdown" id="countdown-label">-- s</div>
+        <div class="countdown-sub" id="countdown-sub">Waiting to begin</div>
+      </div>
+      <div class="muted" id="answer-status-label">Not answered yet</div>
+    </div>
+
+    <div class="feedback" id="feedback-msg"></div>
+  </section>
+</main>
+
+<footer>
+  Automatically syncing every second
+</footer>
+
+<script>
+  // ========== 配置 ==========
+  const API_BASE = ""; // 同域部署
+
+  // ========== DOM ==========
+  const connectionStatus = document.getElementById("connection-status");
+  const roomSelect = document.getElementById("room-select");
+  const studentNameInput = document.getElementById("student-name-input");
+  const btnJoin = document.getElementById("btn-join");
+  const joinedBadge = document.getElementById("joined-badge");
+  const joinHint = document.getElementById("join-hint");
+
+  const questionPill = document.getElementById("question-pill");
+  const questionTextEl = document.getElementById("question-text");
+  const questionMetaEl = document.getElementById("question-meta");
+  const optionsContainer = document.getElementById("options-container");
+  const countdownLabel = document.getElementById("countdown-label");
+  const countdownSub = document.getElementById("countdown-sub");
+  const answerStatusLabel = document.getElementById("answer-status-label");
+  const feedbackMsg = document.getElementById("feedback-msg");
+
+  // ========== 状态 ==========
+  let joinedRoomId = null;
+  let joinedStudentId = null; // 自动生成的 16 位 ID（不展示）
+  let joinedName = null;
+
+  let currentQuestionId = null;
+  let lastQuestionId = null;
+  let hasAnsweredCurrent = false;
+  let chosenOptionLetter = null;
+  let lastAnswerResult = null; // {correct, late}
+
+  let refreshTimerId = null;   // 用于结束时停止轮询
+
+  // ========== 工具函数 ==========
+  function getNowMs() { return Date.now(); }
+  function fmtSeconds(sec) {
+    if (sec < 0) sec = 0;
+    return sec.toFixed(1).replace(/\.0$/, "");
+  }
+  async function fetchJson(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    return await resp.json();
+  }
+  async function postActor(actorType, actorId, payload) {
+    const resp = await fetch(API_BASE + "/invoke", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ actorType, actorId, payload })
+    });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    return await resp.json();
+  }
+  function setJoinedState(isJoined) {
+    if (isJoined) {
+      joinedBadge.textContent = "Joined";
+      joinedBadge.classList.remove("badge-not-joined");
+      joinedBadge.classList.add("badge-joined");
+      joinHint.textContent = `Joined room ${joinedRoomId}. Please wait for the teacher to start the quiz.`;
+      btnJoin.disabled = true;
+      roomSelect.disabled = true;
+      studentNameInput.disabled = true;
+    } else {
+      joinedBadge.textContent = "Not joined";
+      joinedBadge.classList.remove("badge-joined");
+      joinedBadge.classList.add("badge-not-joined");
+      joinHint.textContent = "After joining, you will see questions and choices when the teacher starts the quiz.";
+      btnJoin.disabled = false;
+      roomSelect.disabled = false;
+      studentNameInput.disabled = false;
+    }
+  }
+  function setFeedback(message, isError = false) {
+    if (!message) {
+      feedbackMsg.textContent = "";
+      feedbackMsg.classList.remove("ok", "err");
+      return;
+    }
+    feedbackMsg.textContent = message;
+    feedbackMsg.classList.toggle("ok", !isError);
+    feedbackMsg.classList.toggle("err", isError);
+  }
+  function setQuestionPill(status) {
+    questionPill.classList.remove("pending", "running", "ended");
+    if (status === "running") {
+      questionPill.textContent = "Running";
+      questionPill.classList.add("running");
+    } else if (status === "ended") {
+      questionPill.textContent = "Question ended";
+      questionPill.classList.add("ended");
+    } else {
+      questionPill.textContent = "Waiting";
+      questionPill.classList.add("pending");
+    }
+  }
+
+  // ========== 学生 ID 自动生成（后台用，不展示） ==========
+  function generateStudentId() {
+    const existing = localStorage.getItem("goldfishQuizStudentId");
+    if (existing && existing.length === 16) return existing;
+
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    let s = "";
+    for (let i = 0; i < bytes.length; i++) {
+      s += bytes[i].toString(16).padStart(2, "0");
+    }
+    const id16 = s.slice(0, 16);
+    localStorage.setItem("goldfishQuizStudentId", id16);
+    return id16;
+  }
+  joinedStudentId = generateStudentId();
+
+  // ========== 加载房间列表 ==========
+  async function loadRooms() {
+    try {
+      const data = await fetchJson(API_BASE + "/router-status?actorType=room");
+      const actors = data.actors || [];
+
+      if (actors.length === 0) {
+        roomSelect.innerHTML = "";
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No available rooms. Please contact your instructor.";
+        roomSelect.appendChild(opt);
+        roomSelect.disabled = true;
+        return;
+      }
+
+      roomSelect.innerHTML = "";
+      const rooms = [];
+      for (const a of actors) {
+        const roomId = a.actorId;
+        try {
+          const roomState = await fetchJson(
+            API_BASE +
+              "/actor-status?actorType=room&actorId=" +
+              encodeURIComponent(roomId)
+          );
+          const name = roomState.roomName || roomId;
+          rooms.push({ roomId, roomName: name });
+        } catch {
+          rooms.push({ roomId, roomName: roomId });
+        }
+      }
+
+      for (const r of rooms) {
+        const opt = document.createElement("option");
+        opt.value = r.roomId;
+        opt.textContent = `${r.roomName} (${r.roomId})`;
+        roomSelect.appendChild(opt);
+      }
+
+      roomSelect.value = rooms[0].roomId;
+    } catch (e) {
+      console.error("Failed to load room list:", e);
+      roomSelect.innerHTML = "";
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Failed to load rooms. Please refresh or contact your instructor.";
+      roomSelect.appendChild(opt);
+      roomSelect.disabled = true;
+    }
+  }
+
+  // ========== 加入房间 ==========
+  btnJoin.addEventListener("click", async () => {
+    const roomId = roomSelect.value;
+    const name = studentNameInput.value.trim();
+
+    if (!roomId) {
+      alert("There is no joinable room at the moment. Please contact your instructor.");
+      return;
+    }
+    if (!name) {
+      alert("Please enter your name or nickname.");
+      return;
+    }
+
+    try {
+      btnJoin.disabled = true;
+      setFeedback("");
+
+      const payload = {
+        type: "join",
+        studentId: joinedStudentId,
+        name: name
+      };
+
+      const res = await postActor("room", roomId, payload);
+      if (!res.ok) {
+        setFeedback("Failed to join: " + (res.error || "Unknown error"), true);
+        setJoinedState(false);
+      } else {
+        joinedRoomId = roomId;
+        joinedName = name;
+        setJoinedState(true);
+        setFeedback("Joined successfully! Please wait for the teacher to start the quiz.", false);
+      }
+    } catch (e) {
+      console.error(e);
+      setFeedback("Failed to join: " + e.message, true);
+      setJoinedState(false);
+    } finally {
+      if (!joinedRoomId) btnJoin.disabled = false;
+    }
+  });
+
+  // ========== 提交答案 ==========
+  async function submitAnswer(optionLetter) {
+    if (!joinedRoomId || !joinedStudentId) {
+      setFeedback("Please join a room first.", true);
+      return;
+    }
+    if (!currentQuestionId) {
+      setFeedback("There is no active question at the moment.", true);
+      return;
+    }
+
+    chosenOptionLetter = optionLetter;
+    hasAnsweredCurrent = true;
+    lastAnswerResult = null;
+    renderOptionsDisabled(true);
+
+    try {
+      setFeedback("Submitting your answer...", false);
+      const ret = await postActor("question", currentQuestionId, {
+        type: "submitAnswer",
+        studentId: joinedStudentId,
+        option: optionLetter
+      });
+
+      // 从 return_value.result.result 解析
+      const inner = ret?.result?.result || {};
+      const correct = !!inner.correct;
+      const late = !!inner.late;
+      lastAnswerResult = { correct, late };
+
+      if (late) {
+        setFeedback("Submitted successfully, but it was too late. No score will be awarded for this question.", true);
+        answerStatusLabel.textContent = "Submitted (late)";
+      } else if (correct) {
+        setFeedback("Submitted successfully! Your answer is correct. Please wait for scoring.", false);
+        answerStatusLabel.textContent = "Submitted (correct)";
+      } else {
+        setFeedback("Submitted successfully, but your answer is incorrect.", true);
+        answerStatusLabel.textContent = "Submitted (incorrect)";
+      }
+
+      renderOptionsHighlight();
+    } catch (e) {
+      console.error(e);
+      setFeedback("Submission failed: " + e.message, true);
+      answerStatusLabel.textContent = "Submission failed. Please contact your instructor.";
+    }
+  }
+
+  // ========== 刷新房间 + 题目状态 ==========
+  async function refreshLoop() {
+    const roomId = joinedRoomId || roomSelect.value;
+    if (!roomId) {
+      connectionStatus.textContent = "Waiting for room list...";
+      return;
+    }
+
+    try {
+      connectionStatus.textContent = "Syncing...";
+
+      // 1. 房间状态
+      const room = await fetchJson(
+        API_BASE +
+          "/actor-status?actorType=room&actorId=" +
+          encodeURIComponent(roomId)
+      );
+
+      const totalQ = (room.questions && room.questions.length) || 0;
+      const idx = room.currentQuestionIndex ?? 0;
+      const roomStatus = room.status || "waiting";
+
+      // 若当前自动 ID 已经在房间学生列表里，且尚未手动加入 & 没填名字，则尝试从 StudentActor 拉名字
+      if (!joinedRoomId &&
+          Array.isArray(room.students) &&
+          room.students.includes(joinedStudentId) &&
+          !studentNameInput.value.trim()) {
+        try {
+          const stuState = await fetchJson(
+            API_BASE +
+              "/actor-status?actorType=student&actorId=" +
+              encodeURIComponent(joinedStudentId)
+          );
+          if (stuState && stuState.name) {
+            studentNameInput.value = stuState.name;
+          }
+        } catch (e) {
+          console.warn("Failed to load existing student name:", e);
+        }
+      }
+
+      // 如果房间已经 finished，则展示自己的得分与排名，并停止轮询
+      if (roomStatus === "finished") {
+        renderFinished(room);
+        connectionStatus.textContent = "Quiz finished";
+        if (refreshTimerId !== null) {
+          clearInterval(refreshTimerId);
+          refreshTimerId = null;
+        }
+        return;
+      }
+
+      // 决定当前 questionId
+      let qId = null;
+      if (room.questions && room.questions.length > 0 &&
+          idx >= 0 && idx < room.questions.length) {
+        qId = room.questions[idx];
+      }
+
+      currentQuestionId = qId;
+
+      // 换题重置
+      if (currentQuestionId !== lastQuestionId) {
+        hasAnsweredCurrent = false;
+        chosenOptionLetter = null;
+        lastAnswerResult = null;
+        answerStatusLabel.textContent = "Not answered yet";
+        setFeedback("");
+        lastQuestionId = currentQuestionId;
+      }
+
+      // 2. 题目状态（仅房间 in_question 时展示）
+      let question = null;
+      if (currentQuestionId && roomStatus === "in_question") {
+        question = await fetchJson(
+          API_BASE +
+            "/actor-status?actorType=question&actorId=" +
+            encodeURIComponent(currentQuestionId)
+        );
+      }
+
+      renderQuestion(room, question);
+
+      connectionStatus.textContent = "Synced";
+    } catch (e) {
+      console.error(e);
+      connectionStatus.textContent = "Sync failed";
+    }
+  }
+
+  // ========== 渲染：房间未 finished 时 ==========
+  function renderQuestion(room, question) {
+    const roomId = room.roomId || joinedRoomId || roomSelect.value;
+    const totalQ = (room.questions && room.questions.length) || 0;
+    const idx = room.currentQuestionIndex ?? 0;
+    const qNumStr = totalQ > 0 ? `${idx + 1}/${totalQ}` : "--/--";
+
+    const roomStatus = room.status || "waiting";
+
+    // 房间 waiting 或没有题目时，不展示题目内容
+    if (roomStatus === "waiting" || !question) {
+      questionTextEl.textContent = "The teacher has not started this question yet. Please wait...";
+      questionMetaEl.textContent = `Room: ${roomId} / Question: ${qNumStr}`;
+      setQuestionPill("pending");
+      optionsContainer.innerHTML = "";
+      countdownLabel.textContent = "-- s";
+      countdownSub.textContent = "Waiting for the teacher to start this question";
+      renderOptionsDisabled(true);
+      return;
+    }
+
+    const status = question.status || "pending";
+    setQuestionPill(status === "running" ? "running" : status === "ended" ? "ended" : "pending");
+
+    questionTextEl.textContent = question.text || "(No question text)";
+    questionMetaEl.textContent = `Room: ${question.roomId || roomId} / Question: ${qNumStr}`;
+
+    // 倒计时
+    const durationMs = question.durationMs || 10000;
+    const startTime = question.startTime || null;
+    if (!startTime || status === "pending") {
+      countdownLabel.textContent = "-- s";
+      countdownSub.textContent = "Waiting for the teacher to start this question";
+    } else {
+      const now = getNowMs();
+      const deadline = startTime + durationMs;
+      const leftMs = deadline - now;
+      const leftSec = leftMs / 1000;
+
+      if (leftSec > 0 && status === "running") {
+        countdownLabel.textContent = fmtSeconds(leftSec) + " s";
+        countdownSub.textContent = "Please submit your answer before time runs out";
+      } else {
+        countdownLabel.textContent = "0 s";
+        countdownSub.textContent =
+          status === "ended"
+            ? "This question has ended. Please wait for the teacher to show the results."
+            : "Time is up. Waiting for the teacher to end this question.";
+      }
+    }
+
+    // 选项
+    const options = question.options || [];
+    optionsContainer.innerHTML = "";
+
+    options.forEach((optText, i) => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.type = "button";
+
+      const letter = String.fromCharCode(65 + i);
+      const letterSpan = document.createElement("span");
+      letterSpan.className = "option-letter";
+      letterSpan.textContent = letter + ".";
+
+      const textSpan = document.createElement("span");
+      textSpan.textContent = optText;
+
+      btn.appendChild(letterSpan);
+      btn.appendChild(textSpan);
+
+      btn.addEventListener("click", () => {
+        if (status !== "running") {
+          setFeedback("This question is not running. Please wait for the teacher to start or end it.", true);
+          return;
+        }
+        if (!joinedRoomId) {
+          setFeedback("Please join a room first.", true);
+          return;
+        }
+        if (hasAnsweredCurrent) {
+          setFeedback("You have already submitted an answer for this question.", true);
+          return;
+        }
+        submitAnswer(letter);
+      });
+
+      optionsContainer.appendChild(btn);
+    });
+
+    renderOptionsHighlight();
+    renderOptionsDisabled(status !== "running" || hasAnsweredCurrent);
+  }
+
+  function renderOptionsDisabled(disabled) {
+    const buttons = optionsContainer.querySelectorAll(".option-btn");
+    buttons.forEach(btn => {
+      btn.disabled = disabled;
+    });
+  }
+
+  function renderOptionsHighlight() {
+    const buttons = optionsContainer.querySelectorAll(".option-btn");
+    buttons.forEach(btn => {
+      btn.classList.remove("selected", "correct", "wrong");
+      const letterSpan = btn.querySelector(".option-letter");
+      const letter = letterSpan ? letterSpan.textContent.trim().replace(".", "") : null;
+      if (!letter) return;
+
+      if (chosenOptionLetter && letter === chosenOptionLetter) {
+        btn.classList.add("selected");
+        if (lastAnswerResult) {
+          if (lastAnswerResult.correct && !lastAnswerResult.late) {
+            btn.classList.add("correct");
+          } else {
+            btn.classList.add("wrong");
+          }
+        }
+      }
+    });
+  }
+
+  // ========== 渲染：房间 finished 时（显示个人成绩与排名） ==========
+  function renderFinished(room) {
+    const roomId = room.roomId || joinedRoomId || roomSelect.value;
+    const students = room.students || [];
+    const scores = room.scores || {};
+    const ranking = room.ranking || [];
+
+    const totalPlayers = students.length || Object.keys(scores).length || 0;
+    const myScore = scores[joinedStudentId] ?? 0;
+
+    // 先尝试从 ranking 直接找
+    let myRank = null;
+    if (Array.isArray(ranking) && ranking.length > 0) {
+      const found = ranking.find(r => r.studentId === joinedStudentId);
+      if (found) {
+        myRank = found.rank;
+      }
+    }
+
+    // 若 ranking 中没有自己（比如 0 分没列出），手动计算排名
+    if (myRank == null && totalPlayers > 0) {
+      const arr = students.map(sid => ({
+        studentId: sid,
+        score: scores[sid] ?? 0
+      }));
+      arr.sort((a, b) => b.score - a.score);
+      const idx = arr.findIndex(e => e.studentId === joinedStudentId);
+      if (idx >= 0) {
+        myRank = idx + 1;
+      }
+    }
+
+    const displayName =
+      joinedName ||
+      studentNameInput.value.trim() ||
+      "You";
+
+    setQuestionPill("ended");
+    optionsContainer.innerHTML = "";
+    renderOptionsDisabled(true);
+
+    questionTextEl.textContent =
+      `This quiz session has finished! ${displayName}'s total score is ${myScore}` +
+      (myRank != null && totalPlayers > 0
+        ? `, ranked #${myRank} out of ${totalPlayers} students.`
+        : ".");
+
+    questionMetaEl.textContent = `Room: ${roomId} / Status: finished`;
+
+    countdownLabel.textContent = "0 s";
+    countdownSub.textContent = "Quiz finished. Thanks for participating!";
+
+    answerStatusLabel.textContent = "Quiz finished";
+    setFeedback("", false);
+
+    // 结束时禁止再加入 / 修改
+    btnJoin.disabled = true;
+    roomSelect.disabled = true;
+    studentNameInput.disabled = true;
+    joinedBadge.textContent = "Finished";
+  }
+
+  // ========== 启动 ==========
+  loadRooms();
+  refreshLoop();
+  refreshTimerId = setInterval(refreshLoop, 1000);
+</script>
+</body>
+</html>

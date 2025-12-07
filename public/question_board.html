@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Classroom Quiz Board</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    header {
+      padding: 16px 24px;
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    header h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+
+    header .meta {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    main {
+      padding: 16px 24px 40px;
+      display: grid;
+      grid-template-columns: 2fr 1.5fr;
+      grid-gap: 24px;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px 20px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #111827;
+      border: 1px solid #374151;
+      color: #e5e7eb;
+    }
+
+    .badge.badge-running {
+      border-color: #22c55e;
+      color: #bbf7d0;
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .badge.badge-ended {
+      border-color: #f97316;
+      color: #fed7aa;
+      background: rgba(249, 115, 22, 0.1);
+    }
+
+    .badge.badge-pending {
+      border-color: #60a5fa;
+      color: #bfdbfe;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .question-text {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .options-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 8px;
+    }
+
+    .options-list li {
+      margin-bottom: 6px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+    }
+
+    .options-list li.correct-option {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.5);
+    }
+
+    .options-list li span.option-label {
+      opacity: 0.8;
+      margin-right: 4px;
+    }
+
+    .countdown {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .countdown-label {
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    .controls {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      padding: 6px 14px;
+      font-size: 14px;
+      background: #111827;
+      color: #e5e7eb;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    button.primary {
+      border-color: #22c55e;
+      background: #16a34a;
+    }
+
+    button.danger {
+      border-color: #f97316;
+      background: #b45309;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .small-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .small-inputs label {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .small-inputs input {
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      padding: 4px 8px;
+      font-size: 13px;
+      background: #020617;
+      color: #e5e7eb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #1f2937;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    tr.highlight {
+      background: rgba(34, 197, 94, 0.08);
+    }
+
+    tr.me {
+      background: rgba(59, 130, 246, 0.18);
+    }
+
+    .muted {
+      opacity: 0.6;
+      font-size: 13px;
+    }
+
+    .status-line {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+    }
+
+    .error-banner {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #fecaca;
+      background: rgba(248, 113, 113, 0.1);
+      border-radius: 8px;
+      padding: 4px 8px;
+      border: 1px solid rgba(248, 113, 113, 0.5);
+      display: none;
+    }
+
+    .error-banner.visible {
+      display: block;
+    }
+
+    footer {
+      padding: 8px 24px 14px;
+      font-size: 11px;
+      opacity: 0.6;
+      border-top: 1px solid #1f2937;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Classroom Quiz / Question Board</h1>
+      <div class="meta">
+        Room: <span id="room-id-label">CSCI-6500</span> / Teacher: <span id="teacher-id-label">Lianting</span>
+      </div>
+    </div>
+    <div class="status-line">
+      <div class="dot"></div>
+      <span id="connection-status">Auto refreshing...</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- 左侧：题目与倒计时 -->
+    <section class="card">
+      <h2>
+        Current Question
+        <span id="question-status-badge" class="badge badge-pending">Not started</span>
+      </h2>
+
+      <div class="question-text" id="question-text">The teacher has not started this question yet</div>
+      <ul class="options-list" id="options-list">
+        <!-- 选项渲染在这里 -->
+      </ul>
+      <div class="muted" id="question-meta"></div>
+
+      <div style="margin-top: 12px;">
+        <div class="countdown" id="countdown-label">-- s</div>
+        <div class="countdown-label" id="countdown-sub-label">Waiting for the teacher to start the question</div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-start" class="primary">Start Question</button>
+        <button id="btn-finish" class="danger">Finish Question & Score</button>
+        <button id="btn-end-session" class="danger">End Session</button>
+      </div>
+
+      <div class="small-inputs">
+        <div>
+          <label>Room ID:</label>
+          <input id="room-id-input" value="CSCI-6500" />
+        </div>
+        <div>
+          <label>Teacher ID:</label>
+          <input id="teacher-id-input" value="Lianting" />
+        </div>
+      </div>
+
+      <div id="error-banner" class="error-banner"></div>
+    </section>
+
+    <!-- 右侧：得分榜 + 当前题得分情况 -->
+    <section class="card">
+      <h2>
+        Scores & Ranking
+        <span class="badge">Top 5 / Auto Refresh</span>
+      </h2>
+
+      <div class="muted" id="room-status-summary">Room status not loaded yet</div>
+
+      <table id="scoreboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Student</th>
+            <th>Total Score</th>
+            <th>This Question</th>
+          </tr>
+        </thead>
+        <tbody id="scoreboard-body">
+          <tr><td colspan="4" class="muted">No data</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    Automatically fetches room & question status every second
+  </footer>
+
+  <script>
+    // ===================== 可根据实际情况修改的配置 =====================
+    // 如果前端与 Worker 在同一个域名，可以留空字符串
+    const API_BASE = ""; // 例如 "" 或 "https://your-worker.example.workers.dev"
+
+    // 学生名字缓存
+    const studentInfoCache = new Map(); // studentId -> { name }
+
+    // 自动刷新控制
+    let refreshTimer = null;
+    let autoRefreshStopped = false;
+
+    // ===================== DOM 元素缓存 =====================
+    const roomIdInput = document.getElementById("room-id-input");
+    const teacherIdInput = document.getElementById("teacher-id-input");
+    const roomIdLabel = document.getElementById("room-id-label");
+    const teacherIdLabel = document.getElementById("teacher-id-label");
+
+    const questionTextEl = document.getElementById("question-text");
+    const optionsListEl = document.getElementById("options-list");
+    const questionMetaEl = document.getElementById("question-meta");
+    const questionStatusBadge = document.getElementById("question-status-badge");
+
+    const countdownLabel = document.getElementById("countdown-label");
+    const countdownSubLabel = document.getElementById("countdown-sub-label");
+
+    const btnStart = document.getElementById("btn-start");
+    const btnFinish = document.getElementById("btn-finish");
+    const btnEndSession = document.getElementById("btn-end-session");
+
+    const roomStatusSummary = document.getElementById("room-status-summary");
+    const scoreboardBody = document.getElementById("scoreboard-body");
+
+    const connectionStatus = document.getElementById("connection-status");
+    const errorBanner = document.getElementById("error-banner");
+
+    // ===================== 辅助函数 =====================
+
+    function setError(message) {
+      if (!message) {
+        errorBanner.classList.remove("visible");
+        errorBanner.textContent = "";
+        return;
+      }
+      errorBanner.textContent = message;
+      errorBanner.classList.add("visible");
+    }
+
+    async function fetchJson(url) {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        throw new Error("HTTP " + resp.status);
+      }
+      return await resp.json();
+    }
+
+    async function postActor(actorType, actorId, payload) {
+      const resp = await fetch(API_BASE + "/invoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ actorType, actorId, payload })
+      });
+      if (!resp.ok) {
+        throw new Error("HTTP " + resp.status);
+      }
+      return await resp.json();
+    }
+
+    function updateQuestionStatusBadge(status) {
+      questionStatusBadge.classList.remove(
+        "badge-pending",
+        "badge-running",
+        "badge-ended"
+      );
+      if (status === "running") {
+        questionStatusBadge.textContent = "Running";
+        questionStatusBadge.classList.add("badge-running");
+      } else if (status === "ended") {
+        questionStatusBadge.textContent = "Ended";
+        questionStatusBadge.classList.add("badge-ended");
+      } else {
+        questionStatusBadge.textContent = "Not started";
+        questionStatusBadge.classList.add("badge-pending");
+      }
+    }
+
+    function fmtSeconds(sec) {
+      if (sec < 0) sec = 0;
+      return sec.toFixed(1).replace(/\.0$/, "");
+    }
+
+    function getNowMs() {
+      return Date.now();
+    }
+
+    function stopAutoRefresh() {
+      autoRefreshStopped = true;
+      if (refreshTimer !== null) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+      connectionStatus.textContent = "Session finished, auto refresh stopped";
+    }
+
+    function startAutoRefresh() {
+      if (refreshTimer !== null) {
+        clearInterval(refreshTimer);
+      }
+      autoRefreshStopped = false;
+      refreshTimer = setInterval(refreshAll, 1000);
+    }
+
+    // ===================== 核心：定时刷新逻辑 =====================
+
+    async function refreshAll() {
+      if (autoRefreshStopped) return;
+
+      const roomId = roomIdInput.value.trim();
+      const teacherId = teacherIdInput.value.trim();
+      if (!roomId) return;
+
+      roomIdLabel.textContent = roomId || "CSCI-6500";
+      teacherIdLabel.textContent = teacherId || "Lianting";
+
+      try {
+        connectionStatus.textContent = "Refreshing...";
+        setError("");
+
+        // 1. 拉取 RoomActor 状态
+        const room = await fetchJson(
+          API_BASE +
+            "/actor-status?actorType=room&actorId=" +
+            encodeURIComponent(roomId)
+        );
+
+        const totalQ = (room.questions && room.questions.length) || 0;
+        const idx = room.currentQuestionIndex ?? 0;
+        const status = room.status || "waiting";
+        const statusText =
+          status === "finished"
+            ? "Finished"
+            : status === "in_question"
+            ? "In question"
+            : "Waiting for next question";
+        roomStatusSummary.textContent =
+          `Status: ${statusText} - Current question: ${totalQ ? (idx >= totalQ ? totalQ : idx + 1) : 0}/${totalQ} - ` +
+          `Students joined: ${(room.students && room.students.length) || 0}`;
+
+        // 当前题 ID
+        let currentQuestionId = null;
+        if (room.questions && room.questions.length > 0 &&
+            idx >= 0 && idx < room.questions.length) {
+          currentQuestionId = room.questions[idx];
+        }
+
+        // 2. 如果有当前题，拉取 QuestionActor 状态
+        let question = null;
+        if (currentQuestionId) {
+          question = await fetchJson(
+            API_BASE +
+              "/actor-status?actorType=question&actorId=" +
+              encodeURIComponent(currentQuestionId)
+          );
+        }
+
+        renderQuestion(room, question);
+        await renderScoreboard(room, question);
+
+        // 房间结束 → 停止自动刷新
+        if (room.status === "finished") {
+          stopAutoRefresh();
+        } else {
+          connectionStatus.textContent = "Latest data updated";
+        }
+      } catch (e) {
+        console.error(e);
+        connectionStatus.textContent = "Refresh failed";
+        setError("Refresh failed: " + e.message);
+      }
+    }
+
+    // 渲染题目与倒计时
+    function renderQuestion(room, question) {
+      const roomStatus = room.status || "waiting";
+
+      // 房间已结束：不再展示题目，按钮全禁用
+      if (roomStatus === "finished") {
+        updateQuestionStatusBadge("ended");
+        questionTextEl.textContent = "This quiz session has ended";
+        optionsListEl.innerHTML = "";
+        questionMetaEl.textContent = "";
+        countdownLabel.textContent = "0 s";
+        countdownSubLabel.textContent = "Session finished, please check final scores and ranking";
+
+        btnStart.disabled = true;
+        btnFinish.disabled = true;
+        btnEndSession.disabled = true;
+        return;
+      }
+
+      // 还在等待状态：不展示题干，只提示“尚未开始”
+      if (roomStatus === "waiting" || !question || !question.text) {
+        updateQuestionStatusBadge("pending");
+        questionTextEl.textContent = "The teacher has not started this question yet";
+        optionsListEl.innerHTML = "";
+        questionMetaEl.textContent = "";
+
+        countdownLabel.textContent = "-- s";
+        countdownSubLabel.textContent = "Waiting for the teacher to click \"Start Question\"";
+
+        btnStart.disabled = false;
+        btnFinish.disabled = true;
+        btnEndSession.disabled = false;
+        return;
+      }
+
+      // 房间 in_question 且题目已加载 → 展示题目
+      questionTextEl.textContent = question.text || "(No question text)";
+
+      const durationMs = question.durationMs || 10000;
+      const startTime = question.startTime || null;
+      const now = getNowMs();
+      const deadline = startTime ? startTime + durationMs : null;
+
+      const qStatus = question.status || "pending";
+
+      // 是否应该揭示正确答案：时间归零 或 题目已结束
+      const revealCorrect =
+        (deadline && now > deadline) || qStatus === "ended";
+
+      // 选项
+      optionsListEl.innerHTML = "";
+      const options = question.options || [];
+      for (let i = 0; i < options.length; i++) {
+        const li = document.createElement("li");
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "option-label";
+        const letter = String.fromCharCode(65 + i); // A, B, C...
+        labelSpan.textContent = letter + ".";
+
+        const textSpan = document.createElement("span");
+        textSpan.textContent = options[i];
+
+        li.appendChild(labelSpan);
+        li.appendChild(textSpan);
+
+        // 只有在 revealCorrect 为 true 时才标出正确答案
+        const correctOpt = question.correctOption;
+        if (revealCorrect && correctOpt && correctOpt.length > 0) {
+          if (options[i].trim().startsWith(correctOpt)) {
+            li.classList.add("correct-option");
+          }
+        }
+
+        optionsListEl.appendChild(li);
+      }
+
+      // 元信息
+      updateQuestionStatusBadge(qStatus);
+      const durationStr = (durationMs / 1000).toFixed(1).replace(/\.0$/, "");
+      questionMetaEl.textContent =
+        `Question ID: ${question.questionId} - Room: ${question.roomId || "?"} - Countdown: ${durationStr} seconds`;
+
+      // 倒计时显示
+      if (!startTime || qStatus === "pending") {
+        countdownLabel.textContent = "-- s";
+        countdownSubLabel.textContent = "Waiting to start...";
+      } else {
+        const leftMs = deadline - now;
+        const leftSec = leftMs / 1000;
+
+        if (leftSec > 0 && qStatus === "running") {
+          countdownLabel.textContent = fmtSeconds(leftSec) + " s";
+          countdownSubLabel.textContent = "Please submit before the countdown ends";
+        } else {
+          countdownLabel.textContent = "0 s";
+          countdownSubLabel.textContent =
+            qStatus === "ended"
+              ? "Question ended, showing correct answer"
+              : "Countdown finished, waiting for teacher to finish and score";
+        }
+      }
+
+      // 控制按钮状态
+      btnStart.disabled = qStatus === "running";
+      btnFinish.disabled = qStatus !== "running";
+      btnEndSession.disabled = false;
+    }
+
+    // 渲染得分榜与当前题作答详情
+    async function renderScoreboard(room, question) {
+      const scores = room.scores || {};
+      const students = room.students || [];
+      const answers = (question && question.answers) || {};
+
+      // 为学生取一次名字（从 StudentActor）
+      await ensureStudentNames(students);
+
+      // 生成一个学生列表，带总分
+      const entries = students.map((sid) => {
+        return {
+          studentId: sid,
+          name: (studentInfoCache.get(sid) && studentInfoCache.get(sid).name) || sid,
+          score: scores[sid] || 0,
+          correctThisQuestion: !!(answers[sid] && answers[sid].correct)
+        };
+      });
+
+      // 排名按照总分降序
+      entries.sort((a, b) => b.score - a.score);
+
+      // 只显示前 5 名
+      const displayed = entries.slice(0, 5);
+
+      // 渲染得分榜
+      scoreboardBody.innerHTML = "";
+      if (displayed.length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.className = "muted";
+        td.textContent = "No students joined yet";
+        tr.appendChild(td);
+        scoreboardBody.appendChild(tr);
+      } else {
+        let lastScore = null;
+        let rank = 0;
+        displayed.forEach((e, idx) => {
+          if (e.score !== lastScore) {
+            rank = idx + 1;
+            lastScore = e.score;
+          }
+
+          const tr = document.createElement("tr");
+          if (e.correctThisQuestion) {
+            tr.classList.add("highlight");
+          }
+
+          const tdRank = document.createElement("td");
+          tdRank.textContent = rank;
+
+          const tdName = document.createElement("td");
+          tdName.textContent = e.name || e.studentId;
+
+          const tdScore = document.createElement("td");
+          tdScore.textContent = e.score;
+
+          const tdThis = document.createElement("td");
+          tdThis.textContent = e.correctThisQuestion ? "Correct" : "";
+
+          tr.appendChild(tdRank);
+          tr.appendChild(tdName);
+          tr.appendChild(tdScore);
+          tr.appendChild(tdThis);
+          scoreboardBody.appendChild(tr);
+        });
+      }
+    }
+
+    // 从 StudentActor 拉取学生名字（只拉一次缓存）
+    async function ensureStudentNames(studentIds) {
+      const tasks = [];
+      for (const sid of studentIds) {
+        if (studentInfoCache.has(sid)) continue;
+        tasks.push(
+          (async () => {
+            try {
+              const data = await fetchJson(
+                API_BASE +
+                  "/actor-status?actorType=student&actorId=" +
+                  encodeURIComponent(sid)
+              );
+              studentInfoCache.set(sid, {
+                name: data.name || sid
+              });
+            } catch (e) {
+              console.warn("Failed to fetch student info:", sid, e);
+              studentInfoCache.set(sid, { name: sid });
+            }
+          })()
+        );
+      }
+      if (tasks.length > 0) {
+        await Promise.all(tasks);
+      }
+    }
+
+    // ===================== 按钮事件（老师用） =====================
+
+    btnStart.addEventListener("click", async () => {
+      const roomId = roomIdInput.value.trim();
+      const teacherId = teacherIdInput.value.trim() || "Lianting";
+      if (!roomId) return;
+
+      try {
+        setError("");
+        btnStart.disabled = true;
+        const res = await postActor("teacher", teacherId, {
+          type: "startQuestion",
+          roomId
+        });
+        if (!res.ok) {
+          setError("Failed to start question: " + (res.error || "Unknown"));
+        }
+      } catch (e) {
+        setError("Failed to start question: " + e.message);
+      } finally {
+        btnStart.disabled = false;
+      }
+    });
+
+    btnFinish.addEventListener("click", async () => {
+      const roomId = roomIdInput.value.trim();
+      const teacherId = teacherIdInput.value.trim() || "Lianting";
+      if (!roomId) return;
+
+      try {
+        setError("");
+        btnFinish.disabled = true;
+        const res = await postActor("teacher", teacherId, {
+          type: "finishCurrentQuestion",
+          roomId
+        });
+        if (!res.ok) {
+          setError("Failed to finish question: " + (res.error || "Unknown"));
+        } else {
+          // 结束一题后会自动更新 currentQuestionIndex，下一轮 startQuestion 即是下一题
+          console.log("Question finished:", res.result);
+        }
+      } catch (e) {
+        setError("Failed to finish question: " + e.message);
+      } finally {
+        btnFinish.disabled = false;
+      }
+    });
+
+    // 新：结束本场（调用 TeacherActor.finishRoom），结束后不再自动刷新
+    btnEndSession.addEventListener("click", async () => {
+      const roomId = roomIdInput.value.trim();
+      const teacherId = teacherIdInput.value.trim() || "Lianting";
+      if (!roomId) return;
+
+      try {
+        setError("");
+        btnEndSession.disabled = true;
+        const res = await postActor("teacher", teacherId, {
+          type: "finishRoom",
+          roomId
+        });
+        if (!res.ok) {
+          setError("Failed to end session: " + (res.error || "Unknown"));
+        } else {
+          console.log("Room finished:", res.result);
+          // 再刷新一次拿最终状态，然后停止自动刷新
+          await refreshAll();
+          stopAutoRefresh();
+        }
+      } catch (e) {
+        setError("Failed to end session: " + e.message);
+      } finally {
+        // 即使失败，也允许再次尝试
+        if (!autoRefreshStopped) {
+          btnEndSession.disabled = false;
+        }
+      }
+    });
+
+    // ===================== 启动定时刷新 =====================
+
+    (async () => {
+      await refreshAll();
+      startAutoRefresh();
+    })();
+  </script>
+</body>
+</html>
